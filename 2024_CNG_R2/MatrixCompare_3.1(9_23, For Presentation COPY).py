@@ -1,6 +1,5 @@
 
 # Brendan Hall
-
 #use python 3.7 Mac pro
 
 import numpy as np
@@ -9,12 +8,6 @@ import warnings
 
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 np.set_printoptions(linewidth=300)
-
-# PrintYN = "Y"
-# #PrintYN = input("Print full output: Y/N or Q to Quit:\n")
-# #This will allow user to see all matricies as outputs or quit the program
-# if PrintYN == "Q":
-#     quit()
 
 def sizeroller():
     global x2
@@ -146,8 +139,6 @@ def matchmatrix(result,ID,P,Q,R,S,x1,x2,y1,y2):
     '100010001': 'bi',
     '000010001': 'bj'}
 
-        # MatrixDataframe = pd.DataFrame(MatrixData, columns=["IntMatrix", "ID"])
-
     result_array = np.array(result)
 
     ID_array = np.array(ID)
@@ -172,8 +163,6 @@ def matchmatrix(result,ID,P,Q,R,S,x1,x2,y1,y2):
         print2file(result_ID_array)
 
     return result, ID
-
-# CSV_Output_name=(f"{x2}x{x1}_{y1-1}x{y2-1}.csv")
 
 # These arrays are appended to the bottom and end respectively to 'move' the dynamic array
 
@@ -351,21 +340,15 @@ def run(x1, x2, y1, y2):
     NewY = Y
 
     for P in range(len(X) - toprun):                                    # prevents top overrun
-    # for P in range(len(X)):
+
         for Q in range(len(Y) - overrun):                               # prevents left overrun
-        # for Q in range(len(Y)):
+
             for R in range(len(X)):
 
                 for S in range(len(X[0])):                              # changing to len(X) missing [0] adds
-                                                                       # intersection, possible erroneous?
+
                     base_array[R][S] = X[R][S] + Y[R][S]                # adds two matrices together
-                    # print(P, R)
-            # if PrintYN == "Y":                                          # handles printing preference
-            #     print("\nWhole Matrix:", iteration_id)
-            #
-            # for r in base_array:
-            #     if PrintYN == "Y":                                      # handles printing preference
-            #         print(r)
+
 
             unique_result = np.unique(base_array)
 
@@ -376,11 +359,6 @@ def run(x1, x2, y1, y2):
             matchmatrix(s, iteration_id, P, Q, R, S, x1, x2, y1, y2)
 
             empty_array = np.append(empty_array, [Int_Matrix])
-
-            # if PrintYN == "Y":                                          # handles printing preference
-            #     print("\nIntersection Matrix:\n")
-            #     print(Int_Matrix)
-            #     print("\nEnd of Matrix Comparison:", iteration_id)
 
             iteration_id += 1
             if not np.array_equal(Int_Matrix, unique_result):
@@ -398,9 +376,6 @@ def run(x1, x2, y1, y2):
 
         Y = NewY
 
-        # if PrintYN == "Y":                                              # handles printing preference
-        #     print("\nEnd of horizontal comparison: ", horz_comp)
-
         horz_comp += 1
         NewY = np.delete(NewY, 0, 0)
         NewY = np.append(NewY, horizontal_array_update, axis=0)
@@ -411,63 +386,3 @@ def run(x1, x2, y1, y2):
 sizeroller()
 
 
-
-
-
-
-
-
-# This section creates list of unique 9-intersection results
-#
-# D = list(empty_array)                                               # updated all intersections
-# Q = 9                                                               # grouping size
-# E = [D[i:i + Q] for i in range(0, len(D), Q)]                       # probably a much easier way to group values
-# T = Counter(map(tuple, E))                                          # probably a much easier way to find unique values
-# U = list(T)                                                         # probably a much easier way to find unique values
-#
-
-
-# print(empty_array)
-# print(empty_array2)
-
-# This section handles reading in the matrix definitions and getting the dataframes ready to merge based on common field
-
-# MatrixDict = pd.read_table("512matrices_dict_2.1.txt", dtype=str)   # creates DF of matrix definitions
-#
-# UU = pd.DataFrame(U)                                                # creates DF out of unique results
-# #print(UU)
-# UU.to_csv(CSV_Output_name + " Unique")                              # outputs unique results to csv (does not truncate 0's)
-#
-# UU_1 = UU.astype(int)                                               # converts UU DF to include type integers
-# UU_2 = UU_1.astype(str)                                             # converts UU_1 to string (had trouble preserving 0's
-#                                                                     # and this fixed it)
-#
-# # This concatenates unique results in nine columns into single string in one column
-#
-# UU_conc = UU_2[0]+UU_2[1]+UU_2[2]+UU_2[3]+UU_2[4]+UU_2[5]+UU_2[6]+UU_2[7]+UU_2[8]
-#
-# UU_3 = pd.DataFrame(UU_conc)
-# UU_3.columns = ["IntMatrix"]                                        # adds column header necessary for pd.merge
-# print("\nThe number of unique intersections:", len(UU_3))
-# print("\nUnique Results: \n")
-
-
-
-# MatrixMerge = pd.merge(left=MatrixDict, right=UU_3, left_on='IntMatrix', right_on='IntMatrix')
-# print(MatrixMerge)
-# #print2file(MatrixMerge)
-#
-# UU_4 = MatrixMerge.astype(str)
-#
-# UU_4.to_csv(CSV_Output_name + " Merged")
-#
-# print("\nMatrices:", CSV_Output_name[:-4])
-#
-# format = ['%s']
-# np.savetxt('output.csv', empty_array2, delimiter=',',fmt=format)
-
-#matchmatrix(U)
-
-#%%
-
-#%%
