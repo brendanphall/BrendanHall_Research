@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Translation Temporal Neighborhood - Interactive 3D</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #graph { width: 100vw; height: 100vh; background: #1a1a2e; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            max-width: 280px; z-index: 100;
+        }
+        #info h2 { margin: 0 0 10px 0; font-size: 16px; }
+        #info p { margin: 5px 0; font-size: 12px; opacity: 0.8; }
+        #legend {
+            position: absolute; top: 10px; right: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; z-index: 100;
+        }
+        #legend h3 { margin: 0 0 10px 0; font-size: 14px; }
+        .legend-item { display: flex; align-items: center; margin: 4px 0; font-size: 12px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; }
+        #controls {
+            position: absolute; bottom: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+            z-index: 100; font-size: 12px;
+        }
+    </style>
+    <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+</head>
+<body>
+    <div id="graph"></div>
+    <div id="info">
+        <h2>Figure 10: Translation Temporal</h2>
+        <p>Conceptual Neighborhood Graph of Discretized Temporal Relations</p>
+        <p>74 nodes, 88 edges, 4 components</p>
+        <p>Planar layout</p>
+        <p><strong>Drag</strong> to rotate | <strong>Scroll</strong> to zoom</p>
+    </div>
+    <div id="legend">
+        <h3>Allen Relation Family</h3>
+        <div class="legend-item"><div class="legend-color" style="background: #E74C3C;"></div>Disjoint</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F39C12;"></div>Meet</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F1C40F;"></div>Overlap</div>
+        <div class="legend-item"><div class="legend-color" style="background: #2ECC71;"></div>CoveredBy</div>
+        <div class="legend-item"><div class="legend-color" style="background: #3498DB;"></div>Covers</div>
+        <div class="legend-item"><div class="legend-color" style="background: #9B59B6;"></div>Inside</div>
+        <div class="legend-item"><div class="legend-color" style="background: #E91E63;"></div>Contains</div>
+        <div class="legend-item"><div class="legend-color" style="background: #1ABC9C;"></div>Equal</div>
+    </div>
+    <div id="controls">
+        <strong>Controls:</strong> Click node to focus | Right-click to reset
+    </div>
+    <script>
+        const FAMILY_COLORS = {
+            'disjoint': '#E74C3C', 'meet': '#F39C12', 'overlap': '#F1C40F',
+            'coveredBy': '#2ECC71', 'covers': '#3498DB', 'inside': '#9B59B6',
+            'contains': '#E91E63', 'equal': '#1ABC9C'
+        };
+
+        const NODE_TO_FAMILY = {
+            // Disjoint family
+            'A1': 'disjoint', 'A2': 'disjoint', 'A3': 'disjoint', 'A4': 'disjoint',
+            'A5': 'disjoint', 'A6': 'disjoint', 'A7': 'disjoint', 'A8': 'disjoint',
+            'B1': 'disjoint', 'B2': 'disjoint', 'B3': 'disjoint', 'B4': 'disjoint',
+            'B5': 'disjoint', 'B6': 'disjoint', 'B7': 'disjoint', 'B8': 'disjoint',
+            // Meet family
+            'MB1': 'meet', 'M1': 'meet', 'MB2': 'meet', 'M2': 'meet',
+            'MB3': 'meet', 'M3': 'meet', 'MB4': 'meet', 'M4': 'meet',
+            // Overlap family
+            'O1': 'overlap', 'O2': 'overlap', 'O3': 'overlap', 'O4': 'overlap',
+            'O5': 'overlap', 'O6': 'overlap', 'O7': 'overlap', 'O8': 'overlap',
+            'OB1': 'overlap', 'OB2': 'overlap', 'OB3': 'overlap', 'OB4': 'overlap',
+            'OB5': 'overlap', 'OB6': 'overlap', 'OB7': 'overlap', 'OB8': 'overlap',
+            // CoveredBy family
+            'F1': 'coveredBy', 'F2': 'coveredBy', 'F3': 'coveredBy', 'F4': 'coveredBy',
+            'S1': 'coveredBy', 'S2': 'coveredBy', 'S3': 'coveredBy', 'S4': 'coveredBy',
+            // Covers family
+            'SB1': 'covers', 'SB2': 'covers', 'SB3': 'covers', 'SB4': 'covers',
+            'FB1': 'covers', 'FB2': 'covers', 'FB3': 'covers', 'FB4': 'covers',
+            // Inside family
+            'D1': 'inside', 'D2': 'inside', 'D3A': 'inside', 'D3B': 'inside',
+            'D4': 'inside', 'D5': 'inside', 'D6A': 'inside', 'D6B': 'inside',
+            // Contains family
+            'C1': 'contains', 'C2': 'contains', 'C3A': 'contains', 'C3B': 'contains',
+            'C4': 'contains', 'C5': 'contains', 'C6A': 'contains', 'C6B': 'contains',
+            // Equal family
+            'E1': 'equal', 'E2': 'equal'
+        };
+
+        function getNodeColor(node) {
+            const family = NODE_TO_FAMILY[node] || 'overlap';
+            return FAMILY_COLORS[family] || '#808080';
+        }
+
+        const edges = [
+            ["A3","A4"],["A4","MB2"],["MB2","E2"],["A5","A6"],
+            ["A6","MB3"],["MB3","F3"],["MB3","F4"],["A7","A8"],
+            ["A8","MB4"],["MB4","SB3"],["MB4","SB4"],["F3","D6A"],
+            ["F3","D5"],["SB3","C6A"],["SB3","C5"],["C6A","C4"],
+            ["D6A","D4"],["A1","A2"],["A2","MB1"],["MB1","OB8"],
+            ["MB1","OB5"],["MB1","OB6"],["MB1","OB7"],["OB8","OB3"],
+            ["OB8","OB4"],["OB8","OB1"],["OB1","OB3"],["OB1","OB4"],
+            ["OB1","OB2"],["OB3","F1"],["OB4","SB1"],["OB2","E1"],
+            ["F1","D3A"],["F1","D2"],["D3A","D1"],["SB1","C3A"],
+            ["SB1","C2"],["C3A","C1"],["OB6","F1"],["OB7","SB1"],
+            ["OB6","F2"],["OB7","SB2"],["OB4","SB2"],["OB3","F2"],
+            ["B3","B4"],["B4","M2"],["M2","E2"],["B5","B6"],
+            ["B6","M3"],["M3","S3"],["M3","S4"],["B7","B8"],
+            ["B8","M4"],["M4","FB3"],["M4","FB4"],["S3","D6B"],
+            ["S3","D5"],["FB3","C6B"],["FB3","C5"],["C6B","C4"],
+            ["D6B","D4"],["B1","B2"],["B2","M1"],["M1","O8"],
+            ["M1","O5"],["M1","O6"],["M1","O7"],["O8","O3"],
+            ["O8","O4"],["O8","O1"],["O1","O3"],["O1","O4"],
+            ["O1","O2"],["O3","S1"],["O4","FB1"],["O2","E1"],
+            ["S1","D3B"],["S1","D2"],["D3B","D1"],["FB1","C3B"],
+            ["FB1","C2"],["C3B","C1"],["O6","S1"],["O7","FB1"],
+            ["O6","S2"],["O7","FB2"],["O4","FB2"],["O3","S2"]
+        ];
+
+        const nodeSet = new Set();
+        edges.forEach(([src, tgt]) => { nodeSet.add(src); nodeSet.add(tgt); });
+
+        const gData = {
+            nodes: Array.from(nodeSet).map(id => ({
+                id: id, color: getNodeColor(id), family: NODE_TO_FAMILY[id] || 'unknown'
+            })),
+            links: edges.map(([source, target]) => ({ source, target }))
+        };
+
+        const Graph = ForceGraph3D()
+            (document.getElementById('graph'))
+            .graphData(gData)
+            .nodeLabel(node => `${node.id} (${node.family})`)
+            .nodeColor(node => node.color)
+            .nodeVal(1.5)
+            .nodeOpacity(0.9)
+            .linkWidth(0.5)
+            .linkOpacity(0.4)
+            .linkColor(() => '#aaaaaa')
+            .backgroundColor('#1a1a2e')
+            .showNavInfo(false)
+            .onNodeClick(node => {
+                const distance = 100;
+                const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                Graph.cameraPosition(
+                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                    node, 1000
+                );
+            })
+            .onBackgroundRightClick(() => {
+                Graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 1000);
+            });
+
+        Graph.d3Force('charge').strength(-80);
+        Graph.d3Force('link').distance(35);
+
+        setTimeout(() => { Graph.cameraPosition({ x: 0, y: 0, z: 400 }); }, 100);
+    </script>
+</body>
+</html>

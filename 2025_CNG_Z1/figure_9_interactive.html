@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Translation Neighborhood - Interactive 3D</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #graph { width: 100vw; height: 100vh; background: #1a1a2e; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            max-width: 280px; z-index: 100;
+        }
+        #info h2 { margin: 0 0 10px 0; font-size: 16px; }
+        #info p { margin: 5px 0; font-size: 12px; opacity: 0.8; }
+        #legend {
+            position: absolute; top: 10px; right: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; z-index: 100;
+        }
+        #legend h3 { margin: 0 0 10px 0; font-size: 14px; }
+        .legend-item { display: flex; align-items: center; margin: 4px 0; font-size: 12px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; }
+        #controls {
+            position: absolute; bottom: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+            z-index: 100; font-size: 12px;
+        }
+    </style>
+    <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+</head>
+<body>
+    <div id="graph"></div>
+    <div id="info">
+        <h2>Figure 7: Translation Neighborhood</h2>
+        <p>Conceptual Neighborhood Graph of Discretized Temporal Relations</p>
+        <p>42 nodes, 44 edges, 4 components</p>
+        <p><strong>Drag</strong> to rotate | <strong>Scroll</strong> to zoom</p>
+    </div>
+    <div id="legend">
+        <h3>Allen Relation Family</h3>
+        <div class="legend-item"><div class="legend-color" style="background: #E74C3C;"></div>Disjoint</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F39C12;"></div>Meet</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F1C40F;"></div>Overlap</div>
+        <div class="legend-item"><div class="legend-color" style="background: #2ECC71;"></div>CoveredBy</div>
+        <div class="legend-item"><div class="legend-color" style="background: #3498DB;"></div>Covers</div>
+        <div class="legend-item"><div class="legend-color" style="background: #9B59B6;"></div>Inside</div>
+        <div class="legend-item"><div class="legend-color" style="background: #E91E63;"></div>Contains</div>
+        <div class="legend-item"><div class="legend-color" style="background: #1ABC9C;"></div>Equal</div>
+    </div>
+    <div id="controls">
+        <strong>Controls:</strong> Click node to focus | Right-click to reset
+    </div>
+    <script>
+        const FAMILY_COLORS = {
+            'disjoint': '#E74C3C', 'meet': '#F39C12', 'overlap': '#F1C40F',
+            'coveredBy': '#2ECC71', 'covers': '#3498DB', 'inside': '#9B59B6',
+            'contains': '#E91E63', 'equal': '#1ABC9C'
+        };
+
+        const RELATION_TO_FAMILY = {
+            'disjoint': 'disjoint', 'disjointTouch': 'disjoint', 'disjointNoInterior': 'disjoint',
+            'disjointTouchNoInterior': 'disjoint', 'disjointNoAInterior': 'disjoint',
+            'disjointNoAInteriorTouch': 'disjoint', 'disjointNoBInterior': 'disjoint',
+            'disjointNoBInteriorTouch': 'disjoint', 'meet': 'meet', 'meetNoInterior': 'meet',
+            'meetNoAInterior': 'meet', 'meetNoBInterior': 'meet', 'overlapMeet': 'overlap',
+            'overlap': 'overlap', 'overlapTotal': 'overlap', 'overlapCoveredBy': 'overlap',
+            'overlapCovers': 'overlap', 'overlapSmall': 'overlap', 'overlapSmallA': 'overlap',
+            'overlapSmallB': 'overlap', 'coveredBy': 'coveredBy', 'coveredByTotal': 'coveredBy',
+            'minimalCoveredBy': 'coveredBy', 'minimalCoveredByTotal': 'coveredBy',
+            'covers': 'covers', 'coversTotal': 'covers', 'minimalCovers': 'covers',
+            'minimalCoversTotal': 'covers', 'inside': 'inside', 'insideTotal': 'inside',
+            'insideTouch': 'inside', 'minimalInside': 'inside', 'minimalInsideTotal': 'inside',
+            'minimalInsideTouch': 'inside', 'contains': 'contains', 'containsTotal': 'contains',
+            'containsTouch': 'contains', 'minimalContains': 'contains',
+            'minimalContainsTotal': 'contains', 'minimalContainsTouch': 'contains',
+            'equal': 'equal', 'equalNoInterior': 'equal'
+        };
+
+        function getNodeColor(node) {
+            const family = RELATION_TO_FAMILY[node] || 'overlap';
+            return FAMILY_COLORS[family] || '#808080';
+        }
+
+        const edges = [
+            ["disjointNoInterior","disjointTouchNoInterior"],["disjointTouchNoInterior","meetNoInterior"],["meetNoInterior","equalNoInterior"],["disjointNoAInterior","disjointNoAInteriorTouch"],
+            ["disjointNoAInteriorTouch","meetNoAInterior"],["meetNoAInterior","minimalCoveredBy"],["meetNoAInterior","minimalCoveredByTotal"],["disjointNoBInterior","disjointNoBInteriorTouch"],
+            ["disjointNoBInteriorTouch","meetNoBInterior"],["meetNoBInterior","minimalCovers"],["meetNoBInterior","minimalCoversTotal"],["minimalCoveredBy","minimalInsideTouch"],
+            ["minimalCoveredBy","minimalInsideTotal"],["minimalCovers","minimalContainsTouch"],["minimalCovers","minimalContainsTotal"],["minimalContainsTouch","minimalContains"],
+            ["minimalInsideTouch","minimalInside"],["disjoint","disjointTouch"],["disjointTouch","meet"],["meet","overlapMeet"],
+            ["meet","overlapSmall"],["meet","overlapSmallA"],["meet","overlapSmallB"],["overlapMeet","overlapCoveredBy"],
+            ["overlapMeet","overlapCovers"],["overlapMeet","overlap"],["overlap","overlapCoveredBy"],["overlap","overlapCovers"],
+            ["overlap","overlapTotal"],["overlapCoveredBy","coveredBy"],["overlapCovers","covers"],["overlapTotal","equal"],
+            ["coveredBy","insideTouch"],["coveredBy","insideTotal"],["insideTouch","inside"],["covers","containsTouch"],
+            ["covers","containsTotal"],["containsTouch","contains"],["overlapSmallA","coveredBy"],["overlapSmallB","covers"],
+            ["overlapSmallA","coveredByTotal"],["overlapSmallB","coversTotal"],["overlapCovers","coversTotal"],["overlapCoveredBy","coveredByTotal"]
+        ];
+
+        const nodeSet = new Set();
+        edges.forEach(([src, tgt]) => { nodeSet.add(src); nodeSet.add(tgt); });
+
+        const gData = {
+            nodes: Array.from(nodeSet).map(id => ({
+                id: id, color: getNodeColor(id), family: RELATION_TO_FAMILY[id] || 'unknown'
+            })),
+            links: edges.map(([source, target]) => ({ source, target }))
+        };
+
+        const Graph = ForceGraph3D()
+            (document.getElementById('graph'))
+            .graphData(gData)
+            .nodeLabel(node => `${node.id} (${node.family})`)
+            .nodeColor(node => node.color)
+            .nodeVal(1.5)
+            .nodeOpacity(0.9)
+            .linkWidth(0.5)
+            .linkOpacity(0.4)
+            .linkColor(() => '#aaaaaa')
+            .backgroundColor('#1a1a2e')
+            .showNavInfo(false)
+            .onNodeClick(node => {
+                const distance = 100;
+                const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                Graph.cameraPosition(
+                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                    node, 1000
+                );
+            })
+            .onBackgroundRightClick(() => {
+                Graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 1000);
+            });
+
+        Graph.d3Force('charge').strength(-100);
+        Graph.d3Force('link').distance(40);
+
+        setTimeout(() => { Graph.cameraPosition({ x: 0, y: 0, z: 350 }); }, 100);
+    </script>
+</body>
+</html>

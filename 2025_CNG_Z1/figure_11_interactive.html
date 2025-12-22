@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Anisotropic Scaling Neighborhood - Interactive 3D</title>
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #graph { width: 100vw; height: 100vh; background: #1a1a2e; }
+        #info {
+            position: absolute; top: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            max-width: 280px; z-index: 100;
+        }
+        #info h2 { margin: 0 0 10px 0; font-size: 16px; }
+        #info p { margin: 5px 0; font-size: 12px; opacity: 0.8; }
+        #legend {
+            position: absolute; top: 10px; right: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px; z-index: 100;
+        }
+        #legend h3 { margin: 0 0 10px 0; font-size: 14px; }
+        .legend-item { display: flex; align-items: center; margin: 4px 0; font-size: 12px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 50%; margin-right: 8px; }
+        #controls {
+            position: absolute; bottom: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+            z-index: 100; font-size: 12px;
+        }
+    </style>
+    <script src="https://unpkg.com/3d-force-graph@1.73.4/dist/3d-force-graph.min.js"></script>
+</head>
+<body>
+    <div id="graph"></div>
+    <div id="info">
+        <h2>Figure 8: Anisotropic Scaling</h2>
+        <p>Conceptual Neighborhood Graph of Discretized Relations</p>
+        <p>42 nodes, 86 edges (most complex)</p>
+        <p><strong>Drag</strong> to rotate | <strong>Scroll</strong> to zoom</p>
+    </div>
+    <div id="legend">
+        <h3>Allen Relation Family</h3>
+        <div class="legend-item"><div class="legend-color" style="background: #E74C3C;"></div>Disjoint</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F39C12;"></div>Meet</div>
+        <div class="legend-item"><div class="legend-color" style="background: #F1C40F;"></div>Overlap</div>
+        <div class="legend-item"><div class="legend-color" style="background: #2ECC71;"></div>CoveredBy</div>
+        <div class="legend-item"><div class="legend-color" style="background: #3498DB;"></div>Covers</div>
+        <div class="legend-item"><div class="legend-color" style="background: #9B59B6;"></div>Inside</div>
+        <div class="legend-item"><div class="legend-color" style="background: #E91E63;"></div>Contains</div>
+        <div class="legend-item"><div class="legend-color" style="background: #1ABC9C;"></div>Equal</div>
+    </div>
+    <div id="controls">
+        <strong>Controls:</strong> Click node to focus | Right-click to reset
+    </div>
+    <script>
+        const FAMILY_COLORS = {
+            'disjoint': '#E74C3C', 'meet': '#F39C12', 'overlap': '#F1C40F',
+            'coveredBy': '#2ECC71', 'covers': '#3498DB', 'inside': '#9B59B6',
+            'contains': '#E91E63', 'equal': '#1ABC9C'
+        };
+
+        // Short name to family mapping
+        const NODE_TO_FAMILY = {
+            'D1': 'disjoint', 'D2': 'disjoint', 'D3': 'disjoint', 'D4': 'disjoint',
+            'D5': 'disjoint', 'D6': 'disjoint', 'D7': 'disjoint', 'D8': 'disjoint',
+            'M1': 'meet', 'M2': 'meet', 'M3': 'meet', 'M4': 'meet',
+            'O1': 'overlap', 'O2': 'overlap', 'O3': 'overlap', 'O4': 'overlap',
+            'O5': 'overlap', 'O6': 'overlap', 'O7': 'overlap', 'O8': 'overlap',
+            'CB1': 'coveredBy', 'CB2': 'coveredBy', 'CB3': 'coveredBy', 'CB4': 'coveredBy',
+            'CV1': 'covers', 'CV2': 'covers', 'CV3': 'covers', 'CV4': 'covers',
+            'I1': 'inside', 'I2': 'inside', 'I3': 'inside', 'I4': 'inside', 'I5': 'inside', 'I6': 'inside',
+            'C1': 'contains', 'C2': 'contains', 'C3': 'contains', 'C4': 'contains', 'C5': 'contains', 'C6': 'contains',
+            'E1': 'equal', 'E2': 'equal'
+        };
+
+        function getNodeColor(node) {
+            const family = NODE_TO_FAMILY[node] || 'overlap';
+            return FAMILY_COLORS[family] || '#808080';
+        }
+
+        const edges = [
+            ["D2","M1"],["D1","D5"],["D1","D7"],["D2","D5"],
+            ["D2","D7"],["D2","D6"],["D2","D8"],["D1","D2"],
+            ["M1","M3"],["M1","M4"],["M1","O8"],["M1","D6"],
+            ["M1","D8"],["M1","O6"],["M1","O7"],["E1","CB4"],
+            ["E1","CV4"],["E1","CV2"],["E1","CB2"],["C1","C3"],
+            ["C1","C4"],["C3","CV1"],["C3","C4"],["I1","I3"],
+            ["I1","I4"],["I3","CB1"],["I3","I4"],["C2","C3"],
+            ["C2","CV2"],["C2","C6"],["I2","I3"],["I2","CB2"],
+            ["I2","I6"],["O1","O8"],["O1","O3"],["O1","O4"],
+            ["CV1","CV2"],["CV1","O4"],["CV1","O7"],["CB1","CB2"],
+            ["CB1","O3"],["CB1","O6"],["CV2","CV3"],["CB2","CB3"],
+            ["CV2","C5"],["CB2","I5"],["O2","O3"],["O2","O4"],
+            ["O2","CV2"],["O2","CB2"],["O8","O6"],["O8","O7"],
+            ["O8","O3"],["O8","O4"],["O6","CB3"],["O6","M3"],
+            ["O6","O5"],["O7","CV3"],["O7","M4"],["O7","O5"],
+            ["O5","M3"],["O5","M4"],["D3","D5"],["D3","D7"],
+            ["D3","D6"],["D3","D8"],["D4","D6"],["D4","D8"],
+            ["D4","M3"],["D4","M4"],["E2","CB4"],["E2","CV4"],
+            ["M2","M3"],["M2","M4"],["M2","CB4"],["M2","CV4"],
+            ["D5","D6"],["D6","M3"],["D7","D8"],["D8","M4"],
+            ["CB4","CB3"],["CV4","CV3"],["CB3","CB1"],["CV3","CV1"],
+            ["I5","I6"],["C5","C6"]
+        ];
+
+        const nodeSet = new Set();
+        edges.forEach(([src, tgt]) => { nodeSet.add(src); nodeSet.add(tgt); });
+
+        const gData = {
+            nodes: Array.from(nodeSet).map(id => ({
+                id: id, color: getNodeColor(id), family: NODE_TO_FAMILY[id] || 'unknown'
+            })),
+            links: edges.map(([source, target]) => ({ source, target }))
+        };
+
+        const Graph = ForceGraph3D()
+            (document.getElementById('graph'))
+            .graphData(gData)
+            .nodeLabel(node => `${node.id} (${node.family})`)
+            .nodeColor(node => node.color)
+            .nodeVal(1.5)
+            .nodeOpacity(0.9)
+            .linkWidth(0.5)
+            .linkOpacity(0.4)
+            .linkColor(() => '#aaaaaa')
+            .backgroundColor('#1a1a2e')
+            .showNavInfo(false)
+            .onNodeClick(node => {
+                const distance = 100;
+                const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                Graph.cameraPosition(
+                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                    node, 1000
+                );
+            })
+            .onBackgroundRightClick(() => {
+                Graph.cameraPosition({ x: 0, y: 0, z: 300 }, { x: 0, y: 0, z: 0 }, 1000);
+            });
+
+        Graph.d3Force('charge').strength(-80);
+        Graph.d3Force('link').distance(30);
+
+        setTimeout(() => { Graph.cameraPosition({ x: 0, y: 0, z: 300 }); }, 100);
+    </script>
+</body>
+</html>
