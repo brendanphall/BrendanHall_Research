@@ -1,0 +1,55 @@
+# Interactive Figures: Conceptual Neighborhood Graphs of Discrete Time Intervals
+
+This directory contains interactive visualizations for the IJGI paper "Conceptual Neighborhood Graphs of Discrete Time Intervals."
+
+## Interactive Figures
+
+Click the links below to view interactive neighborhood graphs in your browser:
+
+- [Figure 9: Translation Neighborhood (Z=1)](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_9_interactive.html)
+- [Figure 10: Translation Neighborhood (Z=2)](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_10_interactive.html)
+- [Figure 11: Translation Neighborhood (Z=3)](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_11_interactive.html)
+- [Figure 12: Isotropic Neighborhood](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_12_interactive.html)
+- [Figure 13: Anisotropic Neighborhood](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_13_interactive.html)
+- [Figure 14: Combined Visualization](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_14_interactive.html)
+
+## Features
+
+These interactive visualizations allow you to:
+- Hover over nodes to see relation details
+- Pan and zoom to explore graph structure
+- See the dual encoding system (color + shape) in action
+- Compare different neighborhood types side by side
+
+## About the Visualizations
+
+The figures demonstrate three types of conceptual neighborhood graphs:
+
+- **Translation Neighborhoods (Figures 9-11)**: Show B-Type neighborhoods at different scales (Z=1, 2, 3), demonstrating size-restricted groupings where small relations connect only to small relations.
+
+- **Isotropic Neighborhood (Figure 12)**: Shows the C-Type (scaling) neighborhood with symmetric structure and cross-group connections.
+
+- **Anisotropic Neighborhood (Figure 13)**: Shows the A-Type neighborhood with asymmetric scaling properties.
+
+- **Combined View (Figure 14)**: Presents multiple neighborhood types for direct comparison.
+
+## Encoding System
+
+Each node uses dual encoding:
+- **Color**: Represents Allen relation family (Disjoint, Meet, Overlap, Start, During, Finish, Equal)
+- **Shape**: Represents interior properties (open/closed endpoints)
+
+## Citation
+
+If you use these visualizations, please cite:
+
+Hall, B., & Dube, M. (2025). Conceptual Neighborhood Graphs of Discrete Time Intervals. *ISPRS International Journal of Geo-Information*, manuscript ijgi-3988820.
+
+## Repository Structure
+
+- `figure_*_interactive.html`: Interactive HTML visualizations
+- Static PNG versions available in the main paper figures directory
+
+---
+
+For questions or issues, please contact the authors or open an issue in this repository.
