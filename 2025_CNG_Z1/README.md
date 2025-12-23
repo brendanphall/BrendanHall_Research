@@ -25,28 +25,6 @@ Click the links below to view interactive neighborhood graphs in your browser:
 | Figure 13 | Isotropic Temporal | [View Interactive](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_13_interactive.html) |
 | Figure 14 | Anisotropic Temporal | [View Interactive](https://brendanphall.github.io/BrendanHall_Research/2025_CNG_Z1/figure_14_interactive.html) |
 
-## Repository Structure
-
-```
-1D_Raster_Lines/
-├── README.md                           # This file
-└── Figures/
-    ├── README.md                       # Detailed project documentation
-    ├── relation_dictionary.md          # 42 relations with codes and families
-    ├── Figure_Improvement_Gameplan.md  # Strategy for figure improvements
-    ├── edge_lists/                     # Graph edge data (CSV files)
-    │   └── New/                        # Updated edge lists with BA data
-    ├── Fig_6_isotropic.ipynb           # Isotropic neighborhood
-    ├── Fig_7_translation.ipynb         # Translation neighborhood
-    ├── Fig_8_anisotropic.ipynb         # Anisotropic neighborhood
-    ├── Fig_9_isotropic_temporal.ipynb  # Isotropic temporal
-    ├── Fig_10_translation_temporal.ipynb # Translation temporal
-    ├── Fig_11_anisotropic_temporal.ipynb # Anisotropic temporal
-    ├── Fig_6_isotropic_3D.ipynb        # 3D isotropic visualization
-    ├── Fig_6_isotropic_3D_interactive.ipynb # Interactive 3D version
-    └── figures_generated/              # Output PNG and HTML files
-        └── Interactive/                # Interactive HTML visualizations
-```
 
 ## Quick Start
 
