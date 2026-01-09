@@ -37,11 +37,23 @@ Open any `Fig_*.ipynb` notebook and run all cells to generate figures.
 
 ## Graph Complexity
 
-| Neighborhood | Nodes | Edges | Components | Description |
-|--------------|-------|-------|------------|-------------|
-| Translation | 74 | 88 | 4 | Size-restricted (simplest) |
-| Isotropic | 74 | 144 | 1 | Temporal isotropic scaling |
-| Anisotropic | ~42 | ~86 | 1 | Asymmetric scaling (most complex) |
+| Neighborhood | Edges | Components | Description |
+|--------------|-------|------------|-------------|
+| Translation | 44 | 4 | Size-restricted (simplest) |
+| Isotropic | 83 | 1 | Uniform scaling |
+| Anisotropic | 86 | 1 | Asymmetric scaling (most complex) |
+
+## Edge Lists
+
+The `edge_lists/` directory contains the adjacency lists for each conceptual neighborhood graph:
+
+| File | Description |
+|------|-------------|
+| `translation_edges.csv` | Translation neighborhood (44 edges) |
+| `isotropic_edges.csv` | Isotropic scaling neighborhood (83 edges) |
+| `anisotropic_edges.csv` | Anisotropic scaling neighborhood (86 edges) |
+
+Each CSV has two columns: `Rel1,Rel2` representing an undirected edge between two temporal relations.
 
 ## Dual Encoding System
 
